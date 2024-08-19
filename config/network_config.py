@@ -1,7 +1,7 @@
-input_nodes = 784
-hidden_nodes = 200
-output_nodes = 10
+INPUT_NODES = 784
+HIDDEN_NODES = 200
+OUTPUT_NODES = 10
 
-learning_rate = 0.1
+LEARNING_RATE = 0.1
 
-epochs = 10
+EPOCHS = 10
