@@ -2,9 +2,12 @@ import numpy as nmp
 import os
 import csv
 
+from numpy.ma.core import argmax
+
 from network import NeuralNetwork
 from config.network_config import *
 from config.recognizer_config import *
+
 
 class TextRecognizer:
     def __init__(self):
@@ -41,6 +44,20 @@ class TextRecognizer:
 
         self.__test_network()
         pass
+
+    def recognize_image(self, inputs_array):
+        img_data = 255.0 - inputs_array
+        img_data = (img_data / 255.0 * 0.99) + 0.01
+        return argmax(self.__network.query(img_data))
+
+    def retrain_network(self, inputs_array, correct_answer):
+        img_data = 255.0 - inputs_array
+        inputs = (img_data / 255.0 * 0.99) + 0.01
+        targets = nmp.zeros(OUTPUT_NODES) + 0.01
+        targets[correct_answer] = 0.99
+        for e in range(EPOCHS * INPUT_NODES):
+            self.__network.train(inputs, targets)
+        print('trained')
 
     def __train_network(self):
         with open(TRAIN_DATA_FILENAME, 'r') as training_data_file:
@@ -85,5 +102,6 @@ class TextRecognizer:
         print('Эффективность сети -', network_rate, '%')
 
         pass
+
 
 pass
