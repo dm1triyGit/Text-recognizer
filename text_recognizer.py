@@ -12,7 +12,6 @@ from config.recognizer_config import *
 class TextRecognizer:
     def __init__(self):
         self.__network = NeuralNetwork(INPUT_NODES, HIDDEN_NODES, OUTPUT_NODES, LEARNING_RATE)
-        pass
 
     def process(self):
         if os.path.exists(TRAIN_DATA_DIRECTORY):
@@ -29,21 +28,14 @@ class TextRecognizer:
                     hidden_output_weights.append(nmp.asarray(row, dtype=nmp.float32))
 
             self.__network.seed_weights(nmp.asarray(input_hidden_weights), nmp.asarray(hidden_output_weights))
-            pass
+
         else:
             input_hidden_weights, hidden_output_weights = self.__train_network()
 
             os.mkdir(TRAIN_DATA_DIRECTORY)
-            with open(TRAIN_DATA_WIH_FILENAME, "w", newline="") as file:
-                writer = csv.writer(file)
-                writer.writerows(input_hidden_weights)
-
-            with open(TRAIN_DATA_WHO_FILENAME, "w", newline="") as file:
-                writer = csv.writer(file)
-                writer.writerows(hidden_output_weights)
+            self.__write_trained_data(input_hidden_weights, hidden_output_weights)
 
         self.__test_network()
-        pass
 
     def recognize_image(self, inputs_array):
         img_data = 255.0 - inputs_array
@@ -57,7 +49,18 @@ class TextRecognizer:
         targets[correct_answer] = 0.99
         for e in range(EPOCHS * INPUT_NODES):
             self.__network.train(inputs, targets)
-        print('trained')
+
+        input_hidden_weights, hidden_output_weights = self.__network.get_train_data()
+        self.__write_trained_data(input_hidden_weights, hidden_output_weights)
+
+    def __write_trained_data(self, input_hidden_weights, hidden_output_weights):
+        with open(TRAIN_DATA_WIH_FILENAME, "w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerows(input_hidden_weights)
+
+        with open(TRAIN_DATA_WHO_FILENAME, "w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerows(hidden_output_weights)
 
     def __train_network(self):
         with open(TRAIN_DATA_FILENAME, 'r') as training_data_file:
@@ -71,9 +74,6 @@ class TextRecognizer:
                 targets[int(all_val[0])] = 0.99
 
                 self.__network.train(inputs, targets)
-                pass
-
-            pass
 
         return self.__network.get_train_data()
 
@@ -95,13 +95,7 @@ class TextRecognizer:
                 scorecards.append(1)
             else:
                 scorecards.append(0)
-            pass
 
         scorecards_array = nmp.asarray(scorecards)
         network_rate = (scorecards_array.sum() / scorecards_array.size) * 100
         print('Эффективность сети -', network_rate, '%')
-
-        pass
-
-
-pass

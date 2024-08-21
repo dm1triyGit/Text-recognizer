@@ -1,10 +1,9 @@
-import asyncio
-
 from tkinter import *
 from tkinter.simpledialog import askstring
 from tkinter.messagebox import showinfo
 from PIL import Image, ImageDraw
 from numpy.ma.core import array
+
 
 class MyCanvas:
 
@@ -18,6 +17,7 @@ class MyCanvas:
 
         self.__brush_size = 20
         self.__color = 'black'
+        self.__answer = None
 
         self.__root.columnconfigure(3)
         self.__root.rowconfigure(2)
@@ -49,30 +49,32 @@ class MyCanvas:
         self.__canvas['bg'] = 'white'
         self.__draw_img.rectangle((0, 0, 504, 504), width=0, fill='white')
         self.__answer_lbl.config(text=f"Number is:")
+        self.__answer = None
 
     def __test(self, recognize_func):
         img = self.__image.resize((28, 28))
         img_array = array(img.getdata())
-        answer = recognize_func(img_array)
-        self.__answer_lbl.config(text=f"Number is: {answer}")
-        print(recognize_func(img_array))
+        has_no_data = True
+
+        for pixel in img_array:
+            if pixel < 255:
+                has_no_data = False
+                break
+
+        if not has_no_data:
+            self.__answer = recognize_func(img_array)
+            self.__answer_lbl.config(text=f"Number is: {self.__answer}")
 
     def __retrain(self, retrain_func):
-        correct_answer = int(askstring(title='Wrong',prompt='What is the correct number?',parent=self.__root))
-        if isinstance(correct_answer, int):
-            self.__btn_clear['state'] = 'disabled'
-            self.__btn_test['state'] = 'disabled'
-            self.__btn_wrong['state'] = 'disabled'
-            showinfo(title='Training', message='Process training')
+        if not (self.__answer is None):
+            correct_answer = int(askstring(title='Wrong', prompt='What is the correct number?', parent=self.__root))
+            if isinstance(correct_answer, int):
+                showinfo(title='Training', message='Process training')
 
-            img = self.__image.resize((28, 28))
-            img_array = array(img.getdata())
-            retrain_func(img_array, correct_answer)
-
-            self.__btn_clear['state'] = 'enabled'
-            self.__btn_test['state'] = 'enabled'
-            self.__btn_wrong['state'] = 'enabled'
-
+                img = self.__image.resize((28, 28))
+                img_array = array(img.getdata())
+                retrain_func(img_array, correct_answer)
+                showinfo(title='Trained', message='Training is done')
 
     def show(self):
         self.__root.mainloop()

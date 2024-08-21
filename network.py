@@ -13,7 +13,6 @@ class NeuralNetwork:
         self.__who = (nmp.random.normal(0.0, pow(self.__onodes, -0.5), (self.__onodes, self.__hnodes)))
 
         self.__activation_func = lambda x: spc.expit(x)
-        pass
 
     def train(self, inputs_list, target_list):
         inputs = nmp.array(inputs_list, ndmin=2).T
@@ -32,8 +31,6 @@ class NeuralNetwork:
         self.__wih += self.__lr * nmp.dot((hidden_errors * hidden_outputs * (1.0 - hidden_outputs)),
                                           nmp.transpose(inputs))
 
-        pass
-
     def query(self, inputs_list):
         inputs = nmp.array(inputs_list, ndmin=2).T
 
@@ -48,7 +45,6 @@ class NeuralNetwork:
     def seed_weights(self, weight_input_hidden, weight_hidden_output):
         self.__wih = weight_input_hidden
         self.__who = weight_hidden_output
-        pass
 
     def get_train_data(self):
         return self.__wih, self.__who
